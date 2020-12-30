@@ -16,12 +16,8 @@ class Model(nn.Module):
         
 class BPMLLLoss(nn.Module):
 
-    def __init__(self, size_average=None, reduce=None, reduction='mean'):
+    def __init__(self):
         super().__init__()
-        if size_average is not None or reduce is not None:
-            self.reduction = _Reduction.legacy_get_string(size_average, reduce)
-        else:
-            self.reduction = reduction
 
     def forward(self, input, target):
         # https://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/tkde06a.pdf

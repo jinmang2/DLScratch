@@ -20,15 +20,11 @@ class BPMLLLoss(nn.Module):
     def __init__(self):
         super().__init__()
 
-    def forward(self, input, target, batch_first=True):
+    def forward(self, input, target):
         # https://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/tkde06a.pdf
         # input's shape is (bsz, Q+2)
         # target's shape is (bsz, Q+2)
         # target's unique value is in [-1, 1]
-        
-        # get a batch size
-        ix = 0 if batch_first else -1
-        bsz = target.size(ix)
         
         # get true and false labels
         y_i = (target == 1)
@@ -36,23 +32,22 @@ class BPMLLLoss(nn.Module):
         
         # get indices to check
         truth_matrix = torch.logical_and(y_i.unsqueeze(2), y_i_bar.unsqueeze(1))
-        
         # calculate all exponential diff each batches
         exp_matrix = torch.exp(output.unsqueeze(1) - output.unsqueeze(2))
         
-        # get normalizing term
+        # get normalizing term (length)
         length = truth_matrix.sum(dim=[1,2])
         
-        # padding and sum per batches
-        batch_losses = pad_sequence(
-            # For batch calculate, do pad by 0 values
-            exp_matrix[truth_matrix].split(tuple(length.numpy()))
-        ).sum(dim=0)
+        # calculate inner summation term
+        inner_sum = self._pad_sequence(exp_matrix[truth_matrix], length).sum(dim=0)
+        # apply normalizing terms
+        losses = (1 / length) * inner_sum
         
-        # normalizing
-        losses = batch_losses / y_norm
-        
-        # calculate loss
-        loss = (losses / bsz).sum()
-        
-        return loss
+        return losses.sum()
+    
+    @staticmethod
+    def _pad_sequence(sequence, length):
+        if isinstance(length, torch.Tensor):
+            length = tuple(length.numpy())
+        return  pad_sequence(sequence.split(length))
+       

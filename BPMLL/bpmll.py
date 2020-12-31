@@ -21,6 +21,8 @@ class BPMLLLoss(nn.Module):
         super().__init__()
 
     def forward(self, input, target):
+        # Batch Idea from 
+        #   https://github.com/vanHavel/bp-mll-tensorflow/blob/master/bpmll/bpmll.py
         # https://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/tkde06a.pdf
         # input's shape is (bsz, Q+2)
         # target's shape is (bsz, Q+2)

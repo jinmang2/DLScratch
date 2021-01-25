@@ -52,7 +52,7 @@ class FeatureExtractor(nn.Module):
     def save_outputs_hook(self, layer_id: str) -> Callable:
         def fn(_, __, output):
             self._features[layer_id] = output
-        self.handle[layer_id].remove()
+        self.handle[layer_id].remove() # # https://discuss.pytorch.org/t/can-hook-remove-itself/55266/2
         return fn
       
     def forward(self, x: torch.Tensor, layers: List[str]) -> Dict[str, torch.Tensor]:

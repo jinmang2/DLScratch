@@ -8,12 +8,6 @@ import torch.nn as nn
 
 import torch.nn.functional as F
 
-import torchvision
-import torchvision.models as models
-import torchvision.transforms as transforms
-
-
-
 import argparse
 from argparse import Namespace
 
@@ -25,14 +19,15 @@ from traintools import train
 
 def main(args):
     loaders = dataloader(args)
-    model = ResNet(args.modelname, args.n_classes).to(args.device)
+    model = ResNet(args.n_classes, args.modelname).to(args.device)
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.SGD(
-        model.parameters(), 
+        model.parameters(),
         lr=args.learning_rate,
-        momentum=args.momentum, 
+        momentum=args.momentum,
         weight_decay=args.weight_decay)
-    train()
+    train(model, criterion, optimizer, loaders, args)
+    torch.save(model.state_dict(), 'model.pt')
 
 
 if __name__ == '__main__':
@@ -52,29 +47,17 @@ if __name__ == '__main__':
     parser.add_argument("--weight_decay", type=float, default=2e-4)
     parser.add_argument("--num_epochs", type=int, default=200)
     parser.add_argument("--modelname", type=str, default='resnet152')
-    parser.add_argument("--verbose-epoch", type=int, default=0)
+
     args = parser.parse_args()
-    
     torch.manual_seed(args.seed)
-    print(type(args))
 
     if args.cuda and torch.cuda.is_available():
         args.device = torch.device('cuda')
         torch.cuda.manual_seed_all(args.seed)
     else:
         args.device = torch.device('cpu')
-        
+
+    # if args.verbose_epoch not in list(range(1, args.num_epochs+1)):
+    #     raise ValueError("verbose_epoch must be in [1, num_epochs]")
+
     main(args)
-
-
-
-
-
-
-
-
-
-
-
-
-

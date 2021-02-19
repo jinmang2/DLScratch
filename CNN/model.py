@@ -3,7 +3,6 @@ import torch.nn as nn
 import torchvision.models as models
 
 
-
 resnets = [
     'ResNet', 'resnet18', 'resnet34',
     'resnet50', 'resnet101', 'resnet152',

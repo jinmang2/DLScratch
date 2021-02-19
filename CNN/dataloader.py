@@ -26,12 +26,17 @@ class DogData(Dataset):
 
 def get_loader(data, args, is_train=True):
     if is_train:
-        collate_func = [transforms.RandomRotation(30)]
+        collate_func = [
+            transforms.RandomRotation(30),
+            transforms.RandomResizedCrop(224),
+            transforms.RandomHorizontalFlip(),
+        ]
     else:
-        collate_func = []
+        collate_func = [
+            transforms.Resize(255),
+            transforms.CenterCrop(224),
+        ]
     collate_func.extend([
-        transforms.RandomResizedCrop(224),
-        transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
@@ -41,7 +46,7 @@ def get_loader(data, args, is_train=True):
         dataset,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
-        shuffle=True
+        shuffle=True if is_train else False
     )
 
 

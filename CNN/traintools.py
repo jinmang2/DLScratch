@@ -22,7 +22,7 @@ def train(model, criterion, optimizer, loaders, args):
 
             trn_loss += loss.item()
 
-            if i % (num_batches // 2) == 0:
+            if (i+1) % (num_batches//2) == 0:
                 with torch.no_grad():
                     val_loss = 0.0
                     corr_num, total_num = 0, 0
@@ -31,17 +31,16 @@ def train(model, criterion, optimizer, loaders, args):
                         val_output = model(val_x)
                         v_loss = criterion(val_output, val_label)
                         val_loss += v_loss
-
                         model_label = val_output.argmax(dim=1)
-                        corr = val_label[val_label == model_label].size(0)
-                        corr_num += corr
+                        corr = torch.eq(val_label, model_label).sum()
+                        corr_num += corr.item()
                         total_num += val_label.size(0)
 
                 print(f"epoch: {epoch+1:03d}/{args.num_epochs} | "
                       f"step: {i+1:03d}/{num_batches} | "
-                      f"trn loss: {trn_loss/100:.4f} "
+                      f"trn loss: {trn_loss/100:08.4f} "
                       f"| val loss: {val_loss/len(valLoader):08.4f} "
-                      f"| acc: {(corr_num/total_num)*100:06.2f}")
+                      f"| acc: {(corr_num/total_num)*100:.2f}")
 
                 trn_loss_list.append(trn_loss/100)
                 val_loss_list.append(val_loss/len(valLoader))
